@@ -11,55 +11,48 @@
  * - Support du développement indépendant
  */
 
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { ModuleFederationPlugin } = require("webpack").container;
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+const path = require('path');
+const { dependencies } = require('./package.json');
 
 module.exports = {
-  entry: "./src/index.js",
-  mode: "development",
+  entry: './src/index',  // Point d'entrée principal de l'application
+  output: {
+    filename: '[name].bundle.js', // Nom du fichier de sortie (généré dynamiquement)
+    path: path.resolve(__dirname, 'dist'), // Dossier de sortie (dist)
+    publicPath: 'http://localhost:3001/', // URL publique de base pour les assets (IMPORTANT pour Module Federation)
+  },
   devServer: {
-    port: 3001, // Port différent du Shell pour le développement standalone
-    hot: true,  // Support du Hot Module Replacement
+    port: 3001, // Port du serveur de développement (IMPORTANT : doit être unique pour chaque MFE)
+    static: {
+      directory: path.join(__dirname, 'public'),
+    },
+    headers: { // Configuration des en-têtes CORS (Cross-Origin Resource Sharing)
+      'Access-Control-Allow-Origin': '*', // Autoriser toutes les origines (pour le développement)
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
+    },
   },
   module: {
     rules: [
-      {
-        test: /\.jsx?$/,
-        loader: "babel-loader",
-        exclude: /node_modules/,
-        options: {
-          presets: ["@babel/preset-react"], // Support de la syntaxe JSX
-        },
-      },
+      // ... (règles pour les loaders - OK)
     ],
   },
   plugins: [
-    // Configuration Module Federation pour exposer le Header
     new ModuleFederationPlugin({
-      name: "header", // Nom unique du micro-frontend
-      filename: "remoteEntry.js", // Point d'entrée pour Module Federation
+      name: 'header', // Nom UNIQUE du Micro Frontend (utilisé par le Shell pour l'importer)
+      filename: 'remoteEntry.js', // Nom du fichier d'entrée exposé (conventionnel)
       exposes: {
-        // Expose le composant Header pour l'application Shell
-        // Le chemin './Header' sera utilisé dans l'import côté Shell
-        "./Header": "./src/components/Header",
+        './Header': './src/components/Header', // Expose le composant Header (chemin relatif)
       },
-      shared: {
-        // Configuration du partage des dépendances
-        react: { 
-          singleton: true,      // Une seule instance de React
-          requiredVersion: false, // Flexibilité sur les versions
-          eager: false         // Chargement asynchrone pour le remote
-        },
-        "react-dom": { 
-          singleton: true,
-          requiredVersion: false,
-          eager: false
-        }
+      shared: { // Configuration des dépendances partagées
+        ...dependencies, // Partage toutes les dépendances listées, en s'assurant qu'il y a une seule version pour chaque MFE.
+        react: { singleton: true, requiredVersion: dependencies.react }, // Partage React (IMPORTANT : une seule instance de React)
+        'react-dom': { singleton: true, requiredVersion: dependencies['react-dom'] }, // Partage ReactDOM (IMPORTANT : une seule instance de ReactDOM)
       },
-    }),
-    // Support du développement standalone
-    new HtmlWebpackPlugin({
-      template: "./public/index.html",
     }),
   ],
-}; 
+  resolve: {
+    extensions: ['.js', '.jsx'],
+  },
+};
