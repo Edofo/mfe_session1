@@ -31,8 +31,16 @@ module.exports = {
       },
       shared: {
         // Partage des dépendances
-        react: { singleton: true },
-        "react-dom": { singleton: true }
+        react: { 
+          singleton: true, 
+          requiredVersion: false,
+          eager: false
+        },
+        "react-dom": { 
+          singleton: true,
+          requiredVersion: false,
+          eager: false
+        }
       },
     }),
     new HtmlWebpackPlugin({
