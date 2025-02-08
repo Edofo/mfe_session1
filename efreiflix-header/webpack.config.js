@@ -16,10 +16,10 @@ const path = require('path');
 const { dependencies } = require('./package.json');
 
 module.exports = {
-  entry: './src/index',  // Point d'entrée principal de l'application
+  entry: './src/index.js',
   output: {
-    filename: '[name].bundle.js', // Nom du fichier de sortie (généré dynamiquement)
-    path: path.resolve(__dirname, 'dist'), // Dossier de sortie (dist)
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist'),
     publicPath: 'http://localhost:3001/', // URL publique de base pour les assets (IMPORTANT pour Module Federation)
   },
   devServer: {
@@ -35,8 +35,17 @@ module.exports = {
   },
   module: {
     rules: [
-      // ... (règles pour les loaders - OK)
-    ],
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-react', '@babel/preset-env']
+          }
+        }
+      }
+    ]
   },
   plugins: [
     new ModuleFederationPlugin({
@@ -53,6 +62,6 @@ module.exports = {
     }),
   ],
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js', '.jsx']
   },
 };
