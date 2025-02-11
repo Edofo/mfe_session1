@@ -14,6 +14,7 @@
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 const path = require('path');
 const { dependencies } = require('./package.json');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
@@ -55,10 +56,20 @@ module.exports = {
         './Header': './src/Header', // Expose le composant Header (chemin relatif)
       },
       shared: { // Configuration des dépendances partagées
-        ...dependencies, // Partage toutes les dépendances listées, en s'assurant qu'il y a une seule version pour chaque MFE.
-        react: { singleton: true, requiredVersion: dependencies.react }, // Partage React (IMPORTANT : une seule instance de React)
-        'react-dom': { singleton: true, requiredVersion: dependencies['react-dom'] }, // Partage ReactDOM (IMPORTANT : une seule instance de ReactDOM)
+        react: { 
+          singleton: true, 
+          requiredVersion: dependencies.react,
+          eager: true // Ajout de eager pour le chargement
+        },
+        'react-dom': { 
+          singleton: true, 
+          requiredVersion: dependencies['react-dom'],
+          eager: true // Ajout de eager pour le chargement
+        },
       },
+    }),
+    new HtmlWebpackPlugin({
+      template: './public/index.html',
     }),
   ],
   resolve: {
