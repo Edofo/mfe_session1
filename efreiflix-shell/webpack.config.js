@@ -43,7 +43,7 @@ module.exports = {
         // Format: "nom_remote@url/fichier_entree.js"
         header: 'header@http://localhost:3001/remoteEntry.js', // Configuration pour consommer le MFE 'header'
         // exemple de footer
-        // footer: 'footer@http://localhost:3002/remoteEntry.js', // Configuration pour consommer le MFE 'footer'
+        footer: 'footer@http://localhost:3002/remoteEntry.js', // Configuration pour consommer le MFE 'footer'
         // un autre exemple de MFE
         // search: 'search@http://localhost:3003/remoteEntry.js', // Configuration pour consommer le MFE 'search'
       },
